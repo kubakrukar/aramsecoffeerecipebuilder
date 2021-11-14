@@ -58,6 +58,7 @@ ui <- fluidPage(
                      If left empty, the scale length is rounded up to the next full minute based on the times in the table.", 
                      value = NA),
         br(),
+        checkboxInput("metaON", "Display recipe description", value = TRUE),
         plotOutput("recipePlot")
         )
     )
@@ -150,6 +151,7 @@ server <- function(input, output) {
         
         # data transformations ####
         DF = hot_to_r(input$hot)
+        META = hot_to_r(input$hot2)
         
         # convert time
         DF <- DF %>% mutate(
@@ -194,14 +196,24 @@ server <- function(input, output) {
                 -3)
         }
         
+        # offset starting time to avoid overlap of vertical lines
+        if (nrow(filter(DF, vert.position > 0)) > 1){
+            
+            for (i in 1:nrow(DF)){
+                j <- i+1
+                if (DF[i, "vert.position"] == 2.5){
+                    DF[j, "Start Time"] <- DF[j, "Start Time"] + 1
+                }
+            }
+        }
+        
         # create events to plot ####
         # by combining events and DF
         
         d <- left_join(DF, events, by = "Event Type")
         d <- d %>% mutate(colour = ifelse(is.na(colour), lag(colour), colour),
                           has.horizontal = ifelse(is.na(`End Time`), FALSE, TRUE))
-        
-        
+
         
         # build plot ####
         
@@ -250,6 +262,17 @@ server <- function(input, output) {
                          size = 1,
                          color='black')
         
+        # show minor minor ticks
+        recipe <- recipe + 
+            geom_segment(data = data.frame(t= seq(hms(0),scalemax,5)),
+                         aes(y = -0.25,
+                             yend = 0,
+                             x = t,
+                             xend = t,
+                             label = NULL),
+                         size = 0.5,
+                         color='black')
+        
         
         
         
@@ -285,14 +308,18 @@ server <- function(input, output) {
                                             xend = `Start Time`,
                                             colour = colour), 
                                         size=1) +
-            geom_text(data = filter(d, !is.na(vert.position2)),
+            geom_textbox(data = filter(d, !is.na(vert.position2)),
                                     aes(x = `Start Time`,
                                         y = vert.position2,
                                         label = `Note`),
                       size = 5,
-                      hjust = "bottom",
-                      vjust = "left",
+                      hjust = 0,
+                      vjust = 0,
                       nudge_x = 1,
+                      width = unit(10, "cm"),
+                      box.padding = unit(c(0, 0, 0, 0), "pt"),
+                      box.r = unit(0, "pt"),
+                      box.colour = "white",
                       family = "Nunito")
         }
         
@@ -342,7 +369,9 @@ server <- function(input, output) {
                       family = "Nunito")
         
         # plot horizontal ranges
-        recipe <- recipe + geom_segment(data = filter(d, has.horizontal == TRUE, is.range == TRUE),
+        recipe <- recipe + geom_segment(data = filter(d, 
+                                                      has.horizontal == TRUE, 
+                                                      is.range == TRUE),
                                         aes(y = 0.2,
                                             yend = 0.2,
                                             x = `Start Time` + 0.3,
@@ -359,6 +388,16 @@ server <- function(input, output) {
                                           y = 0.2,
                                           colour = colour),
                                       size = 3)
+        
+        # plot metadata ####
+        if (input$metaON == TRUE){
+            META <- pivot_longer(META, cols = everything())
+            recipe <-  recipe + geom_textbox(data = META,
+                                             aes(x = 1,
+                                                 y = 2,
+                                                 label = value),
+                                             inherit.aes = FALSE)
+        }
         
         recipe
     })

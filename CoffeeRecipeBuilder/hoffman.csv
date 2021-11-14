@@ -1,0 +1,9 @@
+event_type,time_start,time_end,quantity,note,recipe,brewer,coffee,grind,water
+Bloom,0:00,0:30,60,NA,James Hoffman,V60,30g,Medium Fine,500ml @ 95C
+Stir,0:30,,,,,,,,
+Pour,0:45,1:15,300,,,,,,
+Pour,1:15,1:45,500,,,,,,
+Stir,1:45,,,Gently stir the water surface along the inner wall of the v60 to knock down grounds. Do not touch the coffee bed.,,,,,
+Swirl,2:00,,,,,,,,
+Draw Down,2:00,2:45,,,,,,,
+Range,2:45,3:15,,,,,,,
