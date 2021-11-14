@@ -37,7 +37,7 @@ ui <- fluidPage(
     # info
     fluidRow(column(8,
         p("The app is based on the great idea and beautiful design by", a(href="https://aramse.coffee/recipe/", "Ārāmse.")),
-        p("Feel free to contribute or report bugs on the", a(href="https://aramse.coffee/recipe/", "GitHub repo.")),
+        p("Feel free to contribute or report bugs on the", a(href="https://github.com/kubakrukar/aramsecoffeerecipebuilder", "GitHub repo.")),
         br(),
         tags$h2("How to use this app:"),
         tags$ul(
@@ -116,7 +116,7 @@ server <- function(input, output) {
         if (!is.null(input$hot)) {
             DF = hot_to_r(input$hot)
         } else {
-            DF <-  read.csv(here("CoffeeRecipeBuilder", "hoffman.csv"), stringsAsFactors = FALSE)
+            DF <-  read.csv("hoffman.csv", stringsAsFactors = FALSE)
             DF <- DF %>%  
                 transmute(
                 `Event Type` = factor(event_type, 
@@ -138,7 +138,7 @@ server <- function(input, output) {
         if (!is.null(input$hot2)) {
             META = hot_to_r(input$hot2)
         } else {
-            META <-  read.csv(here("CoffeeRecipeBuilder", "hoffman.csv"), stringsAsFactors = FALSE)
+            META <-  read.csv("hoffman.csv", stringsAsFactors = FALSE)
             META <- META %>% select(recipe,brewer,coffee,grind,water)
             META <- META %>%  
                 transmute(
@@ -319,7 +319,7 @@ server <- function(input, output) {
                           label = abbreviation),
                       hjust = "left",
                       vjust = "top",
-                      size = 8,
+                      size = 12,
                       nudge_x = 1,
                       family = "Nunito",
                       fontface = "bold"
@@ -337,7 +337,7 @@ server <- function(input, output) {
                                     aes(x = `Start Time`,
                                         y = vert.position2,
                                         label = `Note`),
-                      size = 5,
+                      size = 8,
                       hjust = 0,
                       vjust = 0,
                       nudge_x = 1,
@@ -365,7 +365,7 @@ server <- function(input, output) {
                       aes(x = t,
                           y = major.tick.size,
                           label = t/60),
-                      size=8, 
+                      size=12, 
                       hjust="left",
                       vjust = "bottom",
                       nudge_x = - (scalemax / 70),
@@ -389,7 +389,7 @@ server <- function(input, output) {
                           label = Quantity,
                           hjust = "right"),
                       nudge_x = - 1.5,
-                      size  = 5, 
+                      size  = 8, 
                       color ='black',
                       family = "Nunito")
         
@@ -424,7 +424,7 @@ server <- function(input, output) {
             META2$value <- paste0("**", META2$value, "**")
             META2 <- data.frame(x = paste(META2$name, META2$value, sep = ": "))
             META2 <- data.frame(x = paste(META2[1,], META2[2,], 
-                                          META2[3,], META2[4,], META2[5,], sep = "<br><br>"))
+                                          META2[3,], META2[4,], META2[5,], sep = "<br>"))
             
             recipe <-  recipe + geom_textbox(data = META2,
                                              aes(x = 0,
@@ -435,10 +435,11 @@ server <- function(input, output) {
                                              vjust = 1,
                                              hjust = 0,
                                              box.colour = "#ffcbbf",
+                                             lineheight = 1,
                                              fill = "#ffcbbf",
                                              box.padding = unit(c(0.5,0.5,0.5,0.5), "cm"),
                                              box.r = unit(20, "pt"),
-                                             size = 5,
+                                             size = 8,
                                              family = "Nunito")
         }
         
