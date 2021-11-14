@@ -427,7 +427,7 @@ server <- function(input, output) {
                                              box.padding = unit(c(0.5,0.5,0.5,0.5), "cm"),
                                              box.r = unit(20, "pt"),
                                              size = 5,
-                                             famil = "Nunito")
+                                             family = "Nunito")
         }
         
         recipe
