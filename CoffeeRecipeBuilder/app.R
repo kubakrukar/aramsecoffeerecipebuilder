@@ -151,6 +151,9 @@ server <- function(input, output) {
         
         # set variables for vertical size ####
         # adjust these values to manipulate vertical distances between elements
+        # you must also adjust height argument of the renderPlot({}, height = )
+        # (at the bottom of the code, value in pixels)
+        
         upper.bound       <- 20     # the upper boundary of the plot
         lower.bound       <- -20    # the lower boundary of the plot
         major.tick.size   <- -3     # ticks every minute
