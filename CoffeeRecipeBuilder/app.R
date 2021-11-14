@@ -25,7 +25,7 @@ library(hms)
 library(showtext)
 library(ggtext)
 
-font_add_google("Nunito")
+font_add_google("Nunito", bold.wt = 900)
 showtext_auto()
 
 # Define UI for application that draws a histogram
@@ -149,6 +149,20 @@ server <- function(input, output) {
     
     output$recipePlot <- renderPlot({
         
+        # set variables for vertical size ####
+        # adjust these values to manipulate vertical distances between elements
+        upper.bound       <- 20     # the upper boundary of the plot
+        lower.bound       <- -20    # the lower boundary of the plot
+        major.tick.size   <- -3     # ticks every minute
+        minor.tick.size   <- -1.5   # ticks every 15 s
+        mini.tick.size    <- -1     # ticks every 5 s
+        shorter.up.line   <- 5      # length of shorter vertical lines with event abbreviations      
+        longer.up.line    <- 7     # length of longer vertical lines with event abbreviations
+        shorter.down.line <- -10     # length of shorter lines with notes
+        longer.down.line  <- -14     # length of longer lines with notes
+        above.timeline    <- 0.7      # how far above timeline are horizontal events plotted
+        q.above.timeline  <- above.timeline + 1
+
         # data transformations ####
         DF = hot_to_r(input$hot)
         META = hot_to_r(input$hot2)
@@ -164,7 +178,7 @@ server <- function(input, output) {
         
         # calculate position of labels
         DF <- DF %>% mutate(
-            vert.position = 1.5
+            vert.position = shorter.up.line
         )
         
         # offset the vertical positions if they're too close to each other
@@ -172,16 +186,16 @@ server <- function(input, output) {
             
             DF[DF$vert.position > 0, "vert.position"] <- ifelse(
                 lead(DF[DF$vert.position > 0, "Start Time"]) - DF[DF$vert.position > 0, "Start Time"] < 15,
-                2.5,
-                1.5)
+                longer.up.line,
+                shorter.up.line)
             
-            DF[is.na(DF$vert.position), "vert.position"] <- 1.5
+            DF[is.na(DF$vert.position), "vert.position"] <- shorter.up.line
         }
         
         # new column for events with notes (for lower vertical lines)
         DF <- DF %>% 
             mutate(
-            vert.position2 = ifelse(Note != "" & Note != "NA" & !is.na(Note), -3, NA)
+            vert.position2 = ifelse(Note != "" & Note != "NA" & !is.na(Note), shorter.down.line, NA)
         )
         
         # offset also the lower vertical positions if they're too close to each other
@@ -192,8 +206,8 @@ server <- function(input, output) {
                                                                          # in the next ifelse()
             DF[!is.na(DF$vert.position2), "vert.position2"] <- ifelse(
                  hack - DF[!is.na(DF$vert.position2), "Start Time"] < 15,
-                -5,
-                -3)
+                longer.down.line,
+                shorter.down.line)
         }
         
         # offset starting time to avoid overlap of vertical lines
@@ -201,7 +215,7 @@ server <- function(input, output) {
             
             for (i in 1:nrow(DF)){
                 j <- i+1
-                if (DF[i, "vert.position"] == 2.5){
+                if (DF[i, "vert.position"] == longer.up.line){
                     DF[j, "Start Time"] <- DF[j, "Start Time"] + 1
                 }
             }
@@ -218,7 +232,6 @@ server <- function(input, output) {
         # build plot ####
         
         # length of scale, in seconds
-        #input <- data.frame(tableScale = " ") # for testing!
         tablescale.exact <- max(c(as.numeric(d[,"Start Time"]), 
                                   as.numeric(d[,"End Time"])), 
                                 na.rm=TRUE)
@@ -239,7 +252,7 @@ server <- function(input, output) {
                              label = `Event Type`)) + 
             theme_classic() +
             scale_x_time(limits = c(- (scalemax / 70), scalemax)) +
-            scale_y_continuous(limits = c(-5, 5)) +
+            scale_y_continuous(limits = c(lower.bound, upper.bound)) +
             theme(axis.line.y   = element_blank(),
                    axis.text.y  = element_blank(),
                    axis.title.x = element_blank(),
@@ -254,7 +267,7 @@ server <- function(input, output) {
         # show minor ticks
         recipe <- recipe + 
             geom_segment(data = data.frame(t= seq(hms(0),scalemax,15)),
-                         aes(y = -0.5,
+                         aes(y = minor.tick.size,
                              yend = 0,
                              x = t,
                              xend = t,
@@ -262,10 +275,10 @@ server <- function(input, output) {
                          size = 1,
                          color='black')
         
-        # show minor minor ticks
+        # show mini ticks
         recipe <- recipe + 
             geom_segment(data = data.frame(t= seq(hms(0),scalemax,5)),
-                         aes(y = -0.25,
+                         aes(y = mini.tick.size,
                              yend = 0,
                              x = t,
                              xend = t,
@@ -284,7 +297,7 @@ server <- function(input, output) {
         # Plot vertical segment lines for milestones
         recipe <- recipe + geom_segment(data =filter(d, is.range == FALSE),
                                         aes(y    = vert.position,
-                                            yend = 0.2,
+                                            yend = above.timeline,
                                             xend = `Start Time`,
                                             colour = colour), 
                                         size=1) + 
@@ -304,7 +317,7 @@ server <- function(input, output) {
         if( nrow(d[!is.na(d$vert.position2),]) > 0){
         recipe <- recipe + geom_segment(data = filter(d, !is.na(vert.position2)), 
                                         aes(y    = vert.position2,
-                                            yend = 0.2,
+                                            yend = above.timeline,
                                             xend = `Start Time`,
                                             colour = colour), 
                                         size=1) +
@@ -329,7 +342,7 @@ server <- function(input, output) {
         # show major ticks
         recipe <- recipe + 
             geom_segment(data = data.frame(t= seq(hms(0),scalemax,60)),
-                         aes(y = -1,
+                         aes(y = major.tick.size,
                              yend = 0,
                              x = t,
                              xend = t,
@@ -338,7 +351,7 @@ server <- function(input, output) {
                          color='black') +
             geom_text(data = data.frame(t= seq(hms(0),scalemax,60)),
                       aes(x = t,
-                          y = - 1,
+                          y = major.tick.size,
                           label = t/60),
                       size=8, 
                       hjust="left",
@@ -351,8 +364,8 @@ server <- function(input, output) {
         # plot horizontal lines for events
         recipe <- recipe + geom_segment(data = filter(d, has.horizontal == TRUE, 
                                                       is.range == FALSE),
-                                        aes(y = 0.2,
-                                            yend = 0.2,
+                                        aes(y = above.timeline,
+                                            yend = above.timeline,
                                             x = `Start Time` + 0.3,
                                             xend = `End Time`- 1,
                                             colour = colour), 
@@ -360,7 +373,7 @@ server <- function(input, output) {
                                         lineend = "round") +
             geom_text(data = filter(d, has.horizontal == TRUE, is.range == FALSE),
                       aes(x = `End Time`,
-                          y = 0.5,
+                          y = q.above.timeline,
                           label = Quantity,
                           hjust = "right"),
                       nudge_x = - 1.5,
@@ -372,8 +385,8 @@ server <- function(input, output) {
         recipe <- recipe + geom_segment(data = filter(d, 
                                                       has.horizontal == TRUE, 
                                                       is.range == TRUE),
-                                        aes(y = 0.2,
-                                            yend = 0.2,
+                                        aes(y = above.timeline,
+                                            yend = above.timeline,
                                             x = `Start Time` + 0.3,
                                             xend = `End Time` - 1,
                                             colour = colour), 
@@ -385,22 +398,38 @@ server <- function(input, output) {
         # plot dots for short events
         recipe <- recipe + geom_point(data = filter(d, has.horizontal == FALSE),
                                       aes(x = `Start Time`,
-                                          y = 0.2,
+                                          y = above.timeline,
                                           colour = colour),
                                       size = 3)
         
         # plot metadata ####
         if (input$metaON == TRUE){
             META <- pivot_longer(META, cols = everything())
-            recipe <-  recipe + geom_textbox(data = META,
-                                             aes(x = 1,
-                                                 y = 2,
-                                                 label = value),
-                                             inherit.aes = FALSE)
+            META2 <- META
+            META2$value <- paste0("**", META2$value, "**")
+            META2 <- data.frame(x = paste(META2$name, META2$value, sep = ": "))
+            META2 <- data.frame(x = paste(META2[1,], META2[2,], 
+                                          META2[3,], META2[4,], META2[5,], sep = "<br><br>"))
+            
+            recipe <-  recipe + geom_textbox(data = META2,
+                                             aes(x = 0,
+                                                 y = upper.bound,
+                                                 label = x),
+                                             inherit.aes = FALSE,
+                                             width = unit(10, "cm"),
+                                             vjust = 1,
+                                             hjust = 0,
+                                             box.colour = "#ffcbbf",
+                                             fill = "#ffcbbf",
+                                             box.padding = unit(c(0.5,0.5,0.5,0.5), "cm"),
+                                             box.r = unit(20, "pt"),
+                                             size = 5,
+                                             famil = "Nunito")
         }
         
         recipe
-    })
+    },
+    height = 600)
 }
 
 # Run the application 
