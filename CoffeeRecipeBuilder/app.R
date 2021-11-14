@@ -32,36 +32,44 @@ showtext_auto()
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Recipe builder based on the Aramse framework"),
+    titlePanel("Recipe builder based on Ārāmse"),
 
-    # the rest
-    verticalLayout(
+    # info
+    fluidRow(column(8,
+        p("The app is based on the great idea and beautiful design by", a(href="https://aramse.coffee/recipe/", "Ārāmse.")),
+        p("Feel free to contribute or report bugs on the", a(href="https://aramse.coffee/recipe/", "GitHub repo.")),
         br(),
-        p("* enter all events in chronological order",  style = "font-family: 'times'; font-si16pt"),
-        p("* right-click to add and remove rows"),
-        p("* the format for Start and End Time is m:s. The maximum number of seconds in this format is 60."),
-        p("* Event Type must be one of following: 
-          Bloom, Distribute, Invert, Swirl, Break Crust, Draw Down, Pour, Stop Brew, Cap On, Grind, Press, Stir, Range"),
-        p("* ranges must be entered as separate rows (Event Type: Range) with Start and End Time; 
-          the Start Time MUST be the same as the End Time of the previous event (the one that you want to extend by a Range)"),
-        p("* events with an End Time get a horizontal coloured line; events without `End Time` are considered short events, with a single vertical line"),
-        p("* if you don't want to display the note for a particular event, delete all text or write `NA` in the `Note` column"),
-        p("* you can break lines in the Notes with option+enter on a mac"),
-        br(),
-        rHandsontableOutput("hot2"),
-        br(),
-        rHandsontableOutput("hot"),
-        actionButton("saveBtn", "Save"),
-        br(),
-        textInput("tableScale", 
-                     "Manually change the length of the scale (m:s). 
-                     If left empty, the scale length is rounded up to the next full minute based on the times in the table.", 
-                     value = NA),
-        br(),
-        checkboxInput("metaON", "Display recipe description", value = TRUE),
+        tags$h2("How to use this app:"),
+        tags$ul(
+            tags$li("enter all events in chronological order"), 
+            tags$li("right-click to add and remove rows"), 
+            tags$li("the format for Start and End Time is m:s"),
+            tags$li("ranges must be entered as separate rows (Event Type: `Range`) with Start and End Time"),
+            tags$li("Start Time of a `Range` must be the same as the End Time of the previous event"),
+            tags$li("events with an End Time get a horizontal coloured line; events without End Time are considered short events with a single vertical line"),
+            tags$li("if you don't want to display the note for a particular event, delete all text or write `NA` in the `Note` column"),
+            tags$li("the app often hangs when you remove a note - I recommend removing the entire row with a right-click"),
+            tags$li("right-click on the image of the recipe in order to download and save it")
+        ))),
+    fluidRow(
+        column(8,
+               #actionButton("saveBtn", "Save"),
+               rHandsontableOutput("hot")
+               ),
+        column(4,
+               rHandsontableOutput("hot2"),
+               br(),
+               textInput("tableScale", 
+                         "Manually change scale length", 
+                         value = NA, placeholder = "mm:ss"),
+               checkboxInput("metaON", "Display recipe description", value = TRUE),
+               
+               )
+    ),
+    fluidRow(
         plotOutput("recipePlot")
-        )
     )
+)
 
 
 # Define server logic required to draw a histogram
@@ -122,6 +130,7 @@ server <- function(input, output) {
         
         DF %>% 
             rhandsontable() %>%
+            hot_cols(colWidths = c(100, 70, 70, 70, 500)) %>% 
             hot_table(highlightCol = TRUE, highlightRow = TRUE)
     })
     
@@ -154,7 +163,7 @@ server <- function(input, output) {
         # you must also adjust height argument of the renderPlot({}, height = )
         # (at the bottom of the code, value in pixels)
         
-        upper.bound       <- 20     # the upper boundary of the plot
+        upper.bound       <- 25     # the upper boundary of the plot
         lower.bound       <- -20    # the lower boundary of the plot
         major.tick.size   <- -3     # ticks every minute
         minor.tick.size   <- -1.5   # ticks every 15 s
@@ -265,7 +274,7 @@ server <- function(input, output) {
                    axis.ticks.x = element_blank(),
                    axis.line.x  = element_blank(),
                    legend.position = "none"
-            )
+            )  + scale_color_manual(values=colours)
         
         # show minor ticks
         recipe <- recipe + 
@@ -385,18 +394,21 @@ server <- function(input, output) {
                       family = "Nunito")
         
         # plot horizontal ranges
-        recipe <- recipe + geom_segment(data = filter(d, 
-                                                      has.horizontal == TRUE, 
-                                                      is.range == TRUE),
-                                        aes(y = above.timeline,
-                                            yend = above.timeline,
-                                            x = `Start Time` + 0.3,
-                                            xend = `End Time` - 1,
-                                            colour = colour), 
-                                        size = 3, 
-                                        alpha = 0.6, 
-                                        lineend = "round"
-        ) + scale_color_manual(values=colours)
+        if (nrow(filter(d, has.horizontal == TRUE, is.range == TRUE)) > 0){
+            recipe <- recipe + geom_segment(data = filter(d, 
+                                                          has.horizontal == TRUE, 
+                                                          is.range == TRUE),
+                                            aes(y = above.timeline,
+                                                yend = above.timeline,
+                                                x = `Start Time` + 0.3,
+                                                xend = `End Time` - 1,
+                                                colour = colour), 
+                                            size = 3, 
+                                            alpha = 0.6, 
+                                            lineend = "round"
+            )
+        }
+        
         
         # plot dots for short events
         recipe <- recipe + geom_point(data = filter(d, has.horizontal == FALSE),
