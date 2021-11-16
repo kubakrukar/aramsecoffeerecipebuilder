@@ -54,16 +54,21 @@ ui <- fluidPage(
     fluidRow(
         column(8,
                #actionButton("saveBtn", "Save"),
-               rHandsontableOutput("hot")
-               ),
-        column(4,
+               rHandsontableOutput("hot"),
+               br(),
                rHandsontableOutput("hot2"),
                br(),
                textInput("tableScale", 
                          "Manually change scale length", 
                          value = NA, placeholder = "mm:ss"),
-               checkboxInput("metaON", "Display recipe description", value = TRUE),
-               
+               checkboxInput("metaON", "Display recipe description", value = TRUE)
+               ),
+        column(4,
+               sliderInput("fonttimeline", label = "Adjust timeline font size", 1, 20, value = 6),
+               sliderInput("fontabbr", label = "Adjust abbreviation font size", 1, 20, value = 6),
+               sliderInput("fontmeta", label = "Adjust description font size", 1, 20, value = 8),
+               sliderInput("fontnote", label = "Adjust note font size", 1, 20, value = 4),
+               sliderInput("fontquant", label = "Adjust quantity font size", 1, 20, value = 4)
                )
     ),
     fluidRow(
@@ -174,6 +179,11 @@ server <- function(input, output) {
         longer.down.line  <- -14     # length of longer lines with notes
         above.timeline    <- 0.7      # how far above timeline are horizontal events plotted
         q.above.timeline  <- above.timeline + 1
+        font.timeline     <- input$fonttimeline
+        font.abbr         <- input$fontabbr
+        font.meta         <- input$fontmeta
+        font.note         <- input$fontnote
+        font.quant        <- input$fontquant
 
         # data transformations ####
         DF = hot_to_r(input$hot)
@@ -319,7 +329,7 @@ server <- function(input, output) {
                           label = abbreviation),
                       hjust = "left",
                       vjust = "top",
-                      size = 12,
+                      size = font.abbr,
                       nudge_x = 1,
                       family = "Nunito",
                       fontface = "bold"
@@ -337,7 +347,7 @@ server <- function(input, output) {
                                     aes(x = `Start Time`,
                                         y = vert.position2,
                                         label = `Note`),
-                      size = 8,
+                      size = font.note,
                       hjust = 0,
                       vjust = 0,
                       nudge_x = 1,
@@ -347,9 +357,6 @@ server <- function(input, output) {
                       box.colour = "white",
                       family = "Nunito")
         }
-        
-        # plot dots at the timeline for evens
-        #recipe <- recipe + geom_point(aes(y=0), size=3)
         
         # show major ticks
         recipe <- recipe + 
@@ -365,7 +372,7 @@ server <- function(input, output) {
                       aes(x = t,
                           y = major.tick.size,
                           label = t/60),
-                      size=12, 
+                      size=font.timeline, 
                       hjust="left",
                       vjust = "bottom",
                       nudge_x = - (scalemax / 70),
@@ -389,7 +396,7 @@ server <- function(input, output) {
                           label = Quantity,
                           hjust = "right"),
                       nudge_x = - 1.5,
-                      size  = 8, 
+                      size  = font.quant, 
                       color ='black',
                       family = "Nunito")
         
@@ -424,7 +431,7 @@ server <- function(input, output) {
             META2$value <- paste0("**", META2$value, "**")
             META2 <- data.frame(x = paste(META2$name, META2$value, sep = ": "))
             META2 <- data.frame(x = paste(META2[1,], META2[2,], 
-                                          META2[3,], META2[4,], META2[5,], sep = "<br>"))
+                                          META2[3,], META2[4,], META2[5,], sep = "<br><br>"))
             
             recipe <-  recipe + geom_textbox(data = META2,
                                              aes(x = 0,
@@ -439,7 +446,7 @@ server <- function(input, output) {
                                              fill = "#ffcbbf",
                                              box.padding = unit(c(0.5,0.5,0.5,0.5), "cm"),
                                              box.r = unit(20, "pt"),
-                                             size = 8,
+                                             size = font.meta,
                                              family = "Nunito")
         }
         
