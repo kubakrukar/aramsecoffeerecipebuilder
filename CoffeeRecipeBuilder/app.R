@@ -49,7 +49,8 @@ ui <- fluidPage(
             tags$li("events with an End Time get a horizontal coloured line; events without End Time are considered short events with a single vertical line"),
             tags$li("if you don't want to display the note for a particular event, delete all text or write `NA` in the `Note` column"),
             tags$li("the app often hangs when you remove a note - I recommend removing the entire row with a right-click"),
-            tags$li("right-click on the image of the recipe in order to download and save it")
+            tags$li("right-click on the image of the recipe in order to download and save it"),
+            tags$li("there is a problem with font size rendering, so you must adjust font sizes manually for the graph to look good")
         ))),
     fluidRow(
         column(8,
