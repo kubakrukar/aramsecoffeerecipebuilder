@@ -30,51 +30,96 @@ showtext_auto()
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
     # Application title
     titlePanel("Recipe builder based on Ārāmse"),
-
+    
     # info
-    fluidRow(column(8,
-        p("The app is based on the great idea and beautiful design by", a(href="https://aramse.coffee/recipe/", "Ārāmse.")),
-        p("Feel free to contribute or report bugs on the", a(href="https://github.com/kubakrukar/aramsecoffeerecipebuilder", "GitHub repo.")),
-        br(),
-        tags$h2("How to use this app:"),
-        tags$ul(
-            tags$li("enter all events in chronological order"), 
-            tags$li("right-click to add and remove rows"), 
-            tags$li("the format for Start and End Time is m:s"),
-            tags$li("ranges must be entered as separate rows (Event Type: `Range`) with Start and End Time"),
-            tags$li("Start Time of a `Range` must be the same as the End Time of the previous event"),
-            tags$li("events with an End Time get a horizontal coloured line; events without End Time are considered short events with a single vertical line"),
-            tags$li("if you don't want to display the note for a particular event, delete all text or write `NA` in the `Note` column"),
-            tags$li("the app often hangs when you remove a note - I recommend removing the entire row with a right-click"),
-            tags$li("right-click on the image of the recipe in order to download and save it"),
-            tags$li("there is a problem with font size rendering, so you must adjust font sizes manually for the graph to look good")
-        ))),
     fluidRow(
-        column(8,
-               #actionButton("saveBtn", "Save"),
-               rHandsontableOutput("hot"),
-               br(),
-               rHandsontableOutput("hot2"),
-               br(),
-               textInput("tableScale", 
-                         "Manually change scale length", 
-                         value = NA, placeholder = "mm:ss"),
-               checkboxInput("metaON", "Display recipe description", value = TRUE)
-               ),
-        column(4,
-               sliderInput("fonttimeline", label = "Adjust timeline font size", 1, 20, value = 6),
-               sliderInput("fontabbr", label = "Adjust abbreviation font size", 1, 20, value = 6),
-               sliderInput("fontmeta", label = "Adjust description font size", 1, 20, value = 8),
-               sliderInput("fontnote", label = "Adjust note font size", 1, 20, value = 4),
-               sliderInput("fontquant", label = "Adjust quantity font size", 1, 20, value = 4)
-               )
-    ),
-    fluidRow(
-        plotOutput("recipePlot")
-    )
+        column(
+            2,
+            p(
+                "The app is based on the idea and beautiful design created by",
+                a(href = "https://aramse.coffee/recipe/", "Ārāmse.")
+            ),
+            p(
+                "Contribute or report bugs via",
+                a(href = "https://github.com/kubakrukar/aramsecoffeerecipebuilder", "GitHub.")
+            )
+        ),
+        column(
+            9,
+            tabsetPanel(
+                tabPanel(
+                    "Recipe",
+                    column(
+                        12,
+                        br(),
+                        #actionButton("saveBtn", "Save"),
+                        rHandsontableOutput("hot"),
+                        br(),
+                        rHandsontableOutput("hot2"),
+                        br()
+                    )
+                ),
+                tabPanel(
+                    "Plot Settings",
+                    column(
+                        6,
+                        br(),
+                        sliderInput("fonttimeline", label = "Timeline font size", 1, 20, value = 6),
+                        sliderInput("fontabbr", label = "Abbreviation font size", 1, 20, value = 6),
+                        sliderInput("fontmeta", label = "Description font size", 1, 20, value = 8),
+                        br()
+                    ),
+                    column(
+                        6,
+                        br(),
+                        sliderInput("fontnote", label = "Note font size", 1, 20, value = 4),
+                        sliderInput("fontquant", label = "Quantity font size", 1, 20, value = 4),
+                        textInput(
+                            "tableScale",
+                            "Manually change scale length",
+                            value = NA,
+                            placeholder = "mm:ss"
+                        ),
+                        checkboxInput("metaON", "Display recipe description", value = TRUE),
+                        br()
+                    )
+                ),
+                tabPanel("How To", column(
+                    12,
+                    tags$h3("How to use this app:"),
+                    tags$ul(
+                        tags$li("enter all events in chronological order"),
+                        tags$li("right-click to add and remove rows"),
+                        tags$li("the format for Start and End Time is m:s"),
+                        tags$li(
+                            "ranges must be entered as separate rows (Event Type: `Range`) with Start and End Time"
+                        ),
+                        tags$li(
+                            "Start Time of a `Range` must be the same as the End Time of the previous event"
+                        ),
+                        tags$li(
+                            "events with an End Time get a horizontal coloured line; events without End Time are considered short events with a single vertical line"
+                        ),
+                        tags$li(
+                            "if you don't want to display the note for a particular event, delete all text or write `NA` in the `Note` column"
+                        ),
+                        tags$li(
+                            "the app often hangs when you remove a note - I recommend removing the entire row with a right-click"
+                        ),
+                        tags$li(
+                            "right-click on the image of the recipe in order to download and save it"
+                        ),
+                        tags$li(
+                            "there is a problem with font size rendering, so you must adjust font sizes manually for the graph to look good"
+                        ),
+                        br()
+                    )
+                ))
+            )
+        )),
+    fluidRow(plotOutput("recipePlot"))
 )
 
 
@@ -440,7 +485,7 @@ server <- function(input, output) {
                                                  label = x),
                                              inherit.aes = FALSE,
                                              width = unit(10, "cm"),
-                                             vjust = 1,
+                                             vjust = .9,
                                              hjust = 0,
                                              box.colour = "#ffcbbf",
                                              lineheight = 1,
