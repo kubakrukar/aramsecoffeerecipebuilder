@@ -44,7 +44,9 @@ ui <- fluidPage(
             p(
                 "Contribute or report bugs via",
                 a(href = "https://github.com/kubakrukar/aramsecoffeerecipebuilder", "GitHub.")
-            )
+            ),
+            br(),
+            downloadButton('downloadPlot', label = "Download Recipe Image", class = NULL)
         ),
         column(
             9,
@@ -496,10 +498,17 @@ server <- function(input, output) {
                                              size = font.meta,
                                              family = "Nunito")
         }
-        
+        ggsave("recipe.png")
         recipe
     },
     height = 600)
+    
+    
+    output$downloadPlot <- downloadHandler(
+        file = "recipe.png" ,
+        content = function(file) {
+            file.copy("recipe.png", file, overwrite = TRUE)
+        })
 }
 
 # Run the application 

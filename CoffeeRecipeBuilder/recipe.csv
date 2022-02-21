@@ -1,3 +1,9 @@
-event_type,time_start,time_end,quantity,note
-Bloom,0:00,0:30,60,empty
-Pour,0:30,0:60,120,test
+event_type,time_start,time_end,quantity,note,recipe,brewer,coffee,grind,water
+Bloom,0:00,0:30,60,NA,,,,,
+Range,0:30,0:60,120,test1,,,,,
+Stir, 1:05,,,blabla,,,,,
+Pour,1:15,1:50,120,test2,,,,,
+Stir, 1:50,,,,,,,,
+Pour,1:55,2:10,120,test3,,,,,
+Draw Down,2:35,3:10,120,test3,,,,,
+Stop Brew,3:10,,,,,,,,

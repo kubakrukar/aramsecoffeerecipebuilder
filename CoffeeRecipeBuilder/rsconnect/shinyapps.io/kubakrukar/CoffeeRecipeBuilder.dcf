@@ -1,0 +1,14 @@
+name: CoffeeRecipeBuilder
+title: CoffeeRecipeBuilder
+username:
+account: kubakrukar
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5121206
+bundleId: 5257675
+url: https://kubakrukar.shinyapps.io/CoffeeRecipeBuilder/
+when: 1637062684.10643
+lastSyncTime: 1637062684.10645
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: recipe.csv
