@@ -7,6 +7,8 @@
 #    http://shiny.rstudio.com/
 #
 
+# Inspirations:
+
 # https://aramse.coffee/recipe/
 
 # https://jrowen.github.io/rhandsontable/
@@ -45,6 +47,14 @@ ui <- fluidPage(
                 "Contribute or report bugs via",
                 a(href = "https://github.com/kubakrukar/aramsecoffeerecipebuilder", "GitHub.")
             ),
+            #br(),
+            #fileInput('uploadedFile', 'Upload Recipe CSV File', multiple = FALSE, 
+            #          accept = c(
+            #    "text/csv",
+            #    "text/comma-separated-values,text/plain",
+            #    ".csv")
+            #),
+            #https://shiny.rstudio.com/articles/download.html
             br(),
             downloadButton('downloadPlot', label = "Download Recipe Image", class = NULL)
         ),
@@ -68,16 +78,16 @@ ui <- fluidPage(
                     column(
                         6,
                         br(),
-                        sliderInput("fonttimeline", label = "Timeline font size", 1, 20, value = 6),
-                        sliderInput("fontabbr", label = "Abbreviation font size", 1, 20, value = 6),
-                        sliderInput("fontmeta", label = "Description font size", 1, 20, value = 8),
+                        sliderInput("fonttimeline", label = "Timeline font size", 1, 20, value = 9),
+                        sliderInput("fontabbr", label = "Abbreviation font size", 1, 20, value = 9),
+                        sliderInput("fontmeta", label = "Description font size", 1, 20, value = 7),
                         br()
                     ),
                     column(
                         6,
                         br(),
-                        sliderInput("fontnote", label = "Note font size", 1, 20, value = 4),
-                        sliderInput("fontquant", label = "Quantity font size", 1, 20, value = 4),
+                        sliderInput("fontnote", label = "Note font size", 1, 20, value = 5),
+                        sliderInput("fontquant", label = "Quantity font size", 1, 20, value = 5),
                         textInput(
                             "tableScale",
                             "Manually change scale length",
