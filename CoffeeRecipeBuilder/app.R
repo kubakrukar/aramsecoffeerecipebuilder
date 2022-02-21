@@ -181,7 +181,7 @@ server <- function(input, output) {
         
         DF %>% 
             rhandsontable() %>%
-            hot_cols(colWidths = c(100, 70, 70, 70, 500)) %>% 
+            hot_cols(colWidths = c(100, 100, 100, 70, 400)) %>% 
             hot_table(highlightCol = TRUE, highlightRow = TRUE)
     })
     
@@ -204,6 +204,7 @@ server <- function(input, output) {
 
         META %>% 
             rhandsontable(rowHeaders = NULL) %>%
+            hot_cols(colWidths = c(220, 150, 150, 150, 150)) %>% 
             hot_table(highlightCol = TRUE, highlightRow = TRUE)
     })
     
